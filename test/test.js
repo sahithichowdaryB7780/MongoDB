@@ -5,14 +5,15 @@ const { expect } = require('chai');
 
 describe('main function', () => {
   // Establish database connection before tests
-  before(async () => {
-    await connectToDatabase();
-  });
+  before(async function () {
+  this.timeout(5000); // Set timeout to 5 seconds
+  await connectToDatabase();
+});
 
-  // Disconnect from database after tests
-  after(async () => {
-    await mongoose.connection.close();
-  });
+after(async function () {
+  this.timeout(5000); // Set timeout to 5 seconds
+  await mongoose.connection.close();
+});
   it('should create, read, update, and delete an item', async () => {
     // Create a new item
     const newItem = new Item({
