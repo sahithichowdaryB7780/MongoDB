@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const connectToDatabase = require('./connect');
-const Item = require('./item');
+const connectToDatabase = require('../connect');
+const Item = require('../item');
 
 async function main() {
   // Connect to MongoDB
