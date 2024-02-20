@@ -4,7 +4,7 @@
   "description": "---fill-this---",
   "main": "index.js",
   "scripts": {
-    "start": "node crud.js" // Change the script to run crud.js
+    "start": "node crud.js"
   },
   "keywords": [],
   "author": "",
