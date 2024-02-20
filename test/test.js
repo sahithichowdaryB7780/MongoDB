@@ -5,12 +5,12 @@ const { expect } = require('chai');
 
 describe('main function', () => {
   // Establish database connection before tests
-  before(async function () {
+  beforeEach(async function () {
   this.timeout(5000); // Set timeout to 5 seconds
   await connectToDatabase();
 });
 
-after(async function () {
+afterEach(async function () {
   this.timeout(5000); // Set timeout to 5 seconds
   await mongoose.connection.close();
 });
