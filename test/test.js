@@ -112,5 +112,3 @@ it('should delete an item', function() {
       });
   });
 });
-
-
