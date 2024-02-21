@@ -1,6 +1,7 @@
 const assert = require('assert');
 const MongoDB = require('../index');
 const mongoose = require('mongoose');
+
 describe('MongoDB CRUD operations', function() {
   let mongoDB;
 
@@ -18,40 +19,74 @@ describe('MongoDB CRUD operations', function() {
     await mongoDB.db.collection('names').deleteMany({});
   });
 
-  it('should successfully connect to the MongoDB database', async function() {
-    assert.strictEqual(mongoose.connection.readyState, 1);
+  it('should successfully connect to the MongoDB database', function() {
+    return new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          assert.strictEqual(mongoose.connection.readyState, 1);
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }, 2000); // Adjust timeout as needed
+    });
   });
 
-  it('should create an item', async function() {
-    const itemId = await mongoDB.createItem({name: 'Test Item'});
-    assert.ok(itemId);
+  it('should create an item', function() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const itemId = await mongoDB.createItem({ name: 'Test Item' });
+        assert.ok(itemId);
 
-    const item = await mongoDB.getItem(itemId);
-    assert.deepStrictEqual(item.toObject(), {_id: itemId, name: 'Test Item'});
+        const item = await mongoDB.getItem(itemId);
+        assert.deepStrictEqual(item.toObject(), { _id: itemId, name: 'Test Item' });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
   });
 
-  it('should get an item', async function() {
-    const newItem = {name: 'Test Item'};
-    const savedItem = await new mongoDB.db.collection('items').insertOne(newItem);
-    const item = await mongoDB.getItem(savedItem.insertedId);
-    assert.deepStrictEqual(item.toObject(), {_id: savedItem.insertedId, name: 'Test Item'});
+  it('should get an item', function() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const newItem = { name: 'Test Item' };
+        const savedItem = await new mongoDB.db.collection('items').insertOne(newItem);
+        const item = await mongoDB.getItem(savedItem.insertedId);
+        assert.deepStrictEqual(item.toObject(), { _id: savedItem.insertedId, name: 'Test Item' });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
   });
 
-  it('should update an item', async function() {
-    const savedItem = await mongoDB.createItem({name: 'Test Item'});
-
-    await mongoDB.updateItem(savedItem, {name: 'Updated Item'});
-
-    const updatedItem = await mongoDB.getItem(savedItem);
-    assert.strictEqual(updatedItem.name, 'Updated Item');
+  it('should update an item', function() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const savedItem = await mongoDB.createItem({ name: 'Test Item' });
+        await mongoDB.updateItem(savedItem, { name: 'Updated Item' });
+        const updatedItem = await mongoDB.getItem(savedItem);
+        assert.strictEqual(updatedItem.name, 'Updated Item');
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
   });
 
-  it('should delete an item', async function() {
-    const savedItem = await mongoDB.createItem({name: 'Test Item'});
-
-    await mongoDB.deleteItem(savedItem);
-
-    const deletedItem = await mongoDB.getItem(savedItem);
-    assert.strictEqual(deletedItem, null);
+  it('should delete an item', function() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const savedItem = await mongoDB.createItem({ name: 'Test Item' });
+        await mongoDB.deleteItem(savedItem);
+        const deletedItem = await mongoDB.getItem(savedItem);
+        assert.strictEqual(deletedItem, null);
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
   });
 });
+
