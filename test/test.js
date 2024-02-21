@@ -1,5 +1,5 @@
 const assert = require('assert');
-const MongoDB = require('./crud');
+const MongoDB = require('../index');
 const mongoose = require('mongoose');
 describe('MongoDB CRUD operations', function() {
   let mongoDB;
