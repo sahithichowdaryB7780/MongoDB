@@ -51,33 +51,47 @@ it('should create an item', function() {
 });
 
 
-  it('should get an item', function() {
-    return new Promise( (resolve, reject) => {
-      try {
-        const newItem = { name: 'Test Item' };
-        const savedItem = await new mongoDB.db.collection('items').insertOne(newItem);
-        const item = await mongoDB.getItem(savedItem.insertedId);
-        assert.deepStrictEqual(item.toObject(), { _id: savedItem.insertedId, name: 'Test Item' });
-        resolve();
-      } catch (error) {
+it('should get an item', function() {
+  return new Promise((resolve, reject) => {
+    const newItem = { name: 'Test Item' };
+    mongoDB.db.collection('items').insertOne(newItem)
+      .then(savedItem => {
+        mongoDB.getItem(savedItem.insertedId)
+          .then(item => {
+            assert.deepStrictEqual(item.toObject(), { _id: savedItem.insertedId, name: 'Test Item' });
+            resolve();
+          })
+          .catch(error => {
+            reject(error);
+          });
+      })
+      .catch(error => {
         reject(error);
-      }
-    });
+      });
   });
+});
+
 
   it('should update an item', function() {
-    return new Promise((resolve, reject) => {
-      try {
-        const savedItem = await mongoDB.createItem({ name: 'Test Item' });
-        await mongoDB.updateItem(savedItem, { name: 'Updated Item' });
-        const updatedItem = await mongoDB.getItem(savedItem);
-        assert.strictEqual(updatedItem.name, 'Updated Item');
-        resolve();
-      } catch (error) {
+  return new Promise((resolve, reject) => {
+    mongoDB.createItem({ name: 'Test Item' })
+      .then(savedItem => {
+        mongoDB.updateItem(savedItem, { name: 'Updated Item' })
+          .then(async () => {
+            const updatedItem = await mongoDB.getItem(savedItem);
+            assert.strictEqual(updatedItem.name, 'Updated Item');
+            resolve();
+          })
+          .catch(error => {
+            reject(error);
+          });
+      })
+      .catch(error => {
         reject(error);
-      }
-    });
+      });
   });
+});
+
 
   it('should delete an item', function() {
     return new Promise( (resolve, reject) => {
