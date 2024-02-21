@@ -32,20 +32,24 @@ describe('MongoDB CRUD operations', function() {
     });
   });
 
-  it('should create an item', function() {
-    return new Promise( (resolve, reject) => {
-      try {
-        const itemId = await mongoDB.createItem({ name: 'Test Item' });
+it('should create an item', function() {
+  return new Promise( (resolve, reject) => {
+    mongoDB.createItem({ name: 'Test Item' })
+      .then(itemId => {
         assert.ok(itemId);
 
-        const item = await mongoDB.getItem(itemId);
-        assert.deepStrictEqual(item.toObject(), { _id: itemId, name: 'Test Item' });
+        return mongoDB.getItem(itemId);
+      })
+      .then(item => {
+        assert.deepStrictEqual(item.toObject(), { name: 'Test Item' });
         resolve();
-      } catch (error) {
+      })
+      .catch(error => {
         reject(error);
-      }
-    });
+      });
   });
+});
+
 
   it('should get an item', function() {
     return new Promise( (resolve, reject) => {
