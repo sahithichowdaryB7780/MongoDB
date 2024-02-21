@@ -1,41 +1,52 @@
 const mongoose = require('mongoose');
-const connectToDatabase = require('./connect');
-const Item = require('./item');
 
-async function main() {
-  // Connect to MongoDB
-  await connectToDatabase();
+// Define item schema
+const itemSchema = new mongoose.Schema({
+  name: String,
+});
 
-  try {
-    // Create a new item
-    const newItem = new Item({
-      name: 'Sahithi',
-      description: 'This is an example item created using Node.js and MongoDB Compass',
+// Define item model
+const Item = mongoose.model('Item', itemSchema);
+
+// MongoDB class with CRUD operations
+class MongoDB {
+  constructor(url, dbName) {
+    this.url = url;
+    this.dbName = dbName;
+  }
+
+  async connect() {
+    await mongoose.connect(this.url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
+  }
+
+  async disconnect() {
+    await mongoose.disconnect();
+  }
+
+  async createItem(itemData) {
+    const newItem = new Item(itemData);
     await newItem.save();
-    console.log('New item created:', newItem);
+    return newItem._id;
+  }
 
-    // Read all items
-    const allItems = await Item.find();
-    console.log('All items:', allItems);
+  async getItem(id) {
+    return await Item.findById(id);
+  }
 
-    // Update an item
-    const itemToUpdate = allItems[0];
-    itemToUpdate.description = 'Updated description';
-    await itemToUpdate.save();
-    console.log('Updated item:', itemToUpdate);
+  async updateItem(id, updates) {
+    await Item.findByIdAndUpdate(id, updates);
+    return id;
+  }
 
-    // Delete an item
-    await Item.deleteOne({_id: itemToUpdate._id});
-    console.log('Item deleted');
-  } catch (error) {
-    console.error('An error occurred:', error);
-  } finally {
-    // Close the MongoDB connection
-    await mongoose.connection.close();
-    console.log('MongoDB connection closed');
+  async deleteItem(id) {
+    await Item.findByIdAndDelete(id);
+    return id;
   }
 }
 
-main();
+module.exports = MongoDB;
+
 
