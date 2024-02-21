@@ -93,18 +93,24 @@ it('should get an item', function() {
 });
 
 
-  it('should delete an item', function() {
-    return new Promise( (resolve, reject) => {
-      try {
-        const savedItem = await mongoDB.createItem({ name: 'Test Item' });
-        await mongoDB.deleteItem(savedItem);
-        const deletedItem = await mongoDB.getItem(savedItem);
-        assert.strictEqual(deletedItem, null);
-        resolve();
-      } catch (error) {
+it('should delete an item', function() {
+  return new Promise((resolve, reject) => {
+    mongoDB.createItem({ name: 'Test Item' })
+      .then(savedItem => {
+        mongoDB.deleteItem(savedItem)
+          .then(async () => {
+            const deletedItem = await mongoDB.getItem(savedItem);
+            assert.strictEqual(deletedItem, null);
+            resolve();
+          })
+          .catch(error => {
+            reject(error);
+          });
+      })
+      .catch(error => {
         reject(error);
-      }
-    });
+      });
   });
 });
+
 
