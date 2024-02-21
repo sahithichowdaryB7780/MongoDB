@@ -33,7 +33,7 @@ describe('MongoDB CRUD operations', function() {
   });
 
   it('should create an item', function() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise( (resolve, reject) => {
       try {
         const itemId = await mongoDB.createItem({ name: 'Test Item' });
         assert.ok(itemId);
@@ -48,7 +48,7 @@ describe('MongoDB CRUD operations', function() {
   });
 
   it('should get an item', function() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise( (resolve, reject) => {
       try {
         const newItem = { name: 'Test Item' };
         const savedItem = await new mongoDB.db.collection('items').insertOne(newItem);
@@ -62,7 +62,7 @@ describe('MongoDB CRUD operations', function() {
   });
 
   it('should update an item', function() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         const savedItem = await mongoDB.createItem({ name: 'Test Item' });
         await mongoDB.updateItem(savedItem, { name: 'Updated Item' });
@@ -76,7 +76,7 @@ describe('MongoDB CRUD operations', function() {
   });
 
   it('should delete an item', function() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise( (resolve, reject) => {
       try {
         const savedItem = await mongoDB.createItem({ name: 'Test Item' });
         await mongoDB.deleteItem(savedItem);
