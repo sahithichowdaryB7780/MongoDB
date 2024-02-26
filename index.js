@@ -1,50 +1,55 @@
 const mongoose = require('mongoose');
+const connector = require('./connector');
+const {MongoMemoryServer} = require('mongodb-memory-server');
 
-// Define item schema
-const itemSchema = new mongoose.Schema({
-  name: String,
-});
+let mongoServer;
 
-// Define item model
-const Item = mongoose.model('Item', itemSchema);
+async function connect() {
+  mongoServer = new MongoMemoryServer();
+  await mongoServer.start();
+  const uri = await mongoServer.getUri();
+  await mongoose.connect(uri);
+  return 1;
+}
 
-// MongoDB class with CRUD operations
-class MongoDB {
-  constructor(url, dbName) {
-    this.url = url;
-    this.dbName = dbName;
-  }
 
-  async connect() {
-    await mongoose.connect(this.url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-  }
+async function create(type, wattage, manufacturer) {
+  await connector.create({
+    Type: type,
+    Wattage: wattage,
+    Manufacturer: manufacturer,
+  });
+  return 1;
+}
+async function read(type) {
+  const result = await connector.find({Type: type});
+  return result.length > 0 ? 1 : 0;
+}
 
-  async disconnect() {
-    await mongoose.disconnect();
-  }
+async function update(type, manufacturer) {
+  const existingDocument = await connector.findOne({Type: type});
 
-  async createItem(itemData) {
-    const newItem = new Item(itemData);
-    await newItem.save();
-    return newItem._id;
-  }
-
-  async getItem(id) {
-    return await Item.findById(id);
-  }
-
-  async updateItem(id, updates) {
-    await Item.findByIdAndUpdate(id, updates);
-    return id;
-  }
-
-  async deleteItem(id) {
-    await Item.findByIdAndDelete(id);
-    return id;
+  // If document exists, perform the update
+  if (existingDocument) {
+    await connector.updateOne({Type: type}, {$set: {Manufacturer: manufacturer}});
+    return 1;
+  } else {
+    // If document does not exist, return 0
+    return 0;
   }
 }
 
-module.exports = MongoDB;
+async function remove(type) {
+  const result = await connector.deleteOne({Type: type});
+  return result.deletedCount > 0 ? 1 : 0;
+}
+async function disconnect() {
+  // drops the database
+  await mongoose.connection.dropDatabase();
+  await mongoose.disconnect();
+  await mongoServer.stop();
+  return 1;
+}
+module.exports = {connect, create, read, update, remove, disconnect};
+
+
