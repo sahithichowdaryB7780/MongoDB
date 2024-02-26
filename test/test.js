@@ -1,115 +1,74 @@
-const assert = require('assert');
-const MongoDB = require('../index');
-const mongoose = require('mongoose');
+const {expect} = require('chai');
+const {connect, create, read, update, remove, disconnect} = require('../index');
 
-describe('MongoDB CRUD operations', function() {
-  let mongoDB;
-
-  before(async function() {
-    mongoDB = new MongoDB('mongodb://127.0.0.1:27017', 'demo_db'); // Assuming MongoDB is running locally
-    await mongoDB.connect();
+describe('Test Suite', () => {
+  before(async () => {
+    const result = await connect();
+    expect(result).to.equal(1);// Connect to the in-memory MongoDB server before running tests
   });
 
-  after(async function() {
-    await mongoDB.disconnect();
+  after(async () => {
+    const result = await disconnect();
+    expect(result).to.equal(1); // Disconnect from the in-memory MongoDB server after running tests
   });
 
-  beforeEach(async function() {
-    // Clear the items collection before each test
-    await mongoDB.db.collection('names').deleteMany({});
+  beforeEach(async () => {
+    // Create documents in the database before each test case
+    await create('Type-A', '15W', 'ABC Electronics');
   });
 
-  it('should successfully connect to the MongoDB database', function() {
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          assert.strictEqual(mongoose.connection.readyState, 1);
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      }, 2000); // Adjust timeout as needed
+  afterEach(async () => {
+    // Check if document of type 'Type-A' exists before attempting to remove it
+    const existingDocument = await read('Type-A');
+
+    if (existingDocument === 1) {
+      // If document of type 'Type-A' exists, remove it
+      await remove('Type-A');
+    }
+  });
+
+
+  describe('create function', () => {
+    it('should create a document in the database', async () => {
+      const result = await create('Type-D', '15W', 'ABC Electronics');
+      expect(result).to.equal(1);
     });
   });
 
-it('should create an item', function() {
-  return new Promise( (resolve, reject) => {
-    mongoDB.createItem({ name: 'Test Item' })
-      .then(itemId => {
-        assert.ok(itemId);
 
-        return mongoDB.getItem(itemId);
-      })
-      .then(item => {
-        assert.deepStrictEqual(item.toObject(), { name: 'Test Item' });
-        resolve();
-      })
-      .catch(error => {
-        reject(error);
-      });
+  describe('read function', () => {
+    it('should return 1 if document with given type exists', async () => {
+      const result = await read('Type-A');
+      expect(result).to.equal(1);
+    });
+
+    it('should return 0 if document with given type does not exist', async () => {
+      const result = await read('Micro-HDMI');
+      expect(result).to.equal(0);
+    });
   });
-});
 
+  describe('update function', () => {
+    it('should update the manufacturer of existing document', async () => {
+      const result = await update('Type-A', '100W');
+      expect(result).to.equal(1);
+    });
 
-it('should get an item', function() {
-  return new Promise((resolve, reject) => {
-    const newItem = { name: 'Test Item' };
-    mongoDB.db.collection('items').insertOne(newItem)
-      .then(savedItem => {
-        mongoDB.getItem(savedItem.insertedId)
-          .then(item => {
-            assert.deepStrictEqual(item.toObject(), { _id: savedItem.insertedId, name: 'Test Item' });
-            resolve();
-          })
-          .catch(error => {
-            reject(error);
-          });
-      })
-      .catch(error => {
-        reject(error);
-      });
+    it('should return 0 if document with given type does not exist', async () => {
+      const result = await update('Micro-HDMI', '7.5W');
+      expect(result).to.equal(0);
+    });
   });
-});
 
+  describe('remove function', () => {
+    it('should remove the document with given type', async () => {
+      const result = await remove('Type-A');
+      expect(result).to.equal(1);
+    });
 
-  it('should update an item', function() {
-  return new Promise((resolve, reject) => {
-    mongoDB.createItem({ name: 'Test Item' })
-      .then(savedItem => {
-        mongoDB.updateItem(savedItem, { name: 'Updated Item' })
-          .then(async () => {
-            const updatedItem = await mongoDB.getItem(savedItem);
-            assert.strictEqual(updatedItem.name, 'Updated Item');
-            resolve();
-          })
-          .catch(error => {
-            reject(error);
-          });
-      })
-      .catch(error => {
-        reject(error);
-      });
+    it('should return 0 if document with given type does not exist', async () => {
+      const result = await remove('Micro-HDMI');
+      expect(result).to.equal(0);
+    });
   });
-});
-
-
-it('should delete an item', function() {
-  return new Promise((resolve, reject) => {
-    mongoDB.createItem({ name: 'Test Item' })
-      .then(savedItem => {
-        mongoDB.deleteItem(savedItem)
-          .then(async () => {
-            const deletedItem = await mongoDB.getItem(savedItem);
-            assert.strictEqual(deletedItem, null);
-            resolve();
-          })
-          .catch(error => {
-            reject(error);
-          });
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
-});
 });
