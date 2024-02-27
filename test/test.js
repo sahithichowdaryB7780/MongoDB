@@ -1,5 +1,24 @@
 const {expect} = require('chai');
-const {connect, create, read, update, remove, disconnect} = require('../index');
+const mongoose = require('mongoose');
+const {create, read, update, remove} = require('../index');
+const {MongoMemoryServer} = require('mongodb-memory-server');
+
+let mongoServer;
+
+async function connect() {
+  mongoServer = new MongoMemoryServer();
+  await mongoServer.start();
+  const uri = await mongoServer.getUri();
+  await mongoose.connect(uri);
+  return 1;
+}
+async function disconnect() {
+  // drops the database
+  await mongoose.connection.dropDatabase();
+  await mongoose.disconnect();
+  await mongoServer.stop();
+  return 1;
+}
 
 describe('Test Suite', () => {
   before(async () => {
